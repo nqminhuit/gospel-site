@@ -18,16 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout church-site
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout daily-bible
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: nqminhuit/daily-bible
           path: daily-bible
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: daily-bible/go.mod
 
