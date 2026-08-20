@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="pageLeft" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fdfaf3"/>
+      <stop offset="100%" stop-color="#f1e9d8"/>
+    </linearGradient>
+    <linearGradient id="pageRight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f1e9d8"/>
+      <stop offset="100%" stop-color="#fdfaf3"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M32 14 C26 9 16 8 8 10 L8 46 C16 44 26 45 32 50 Z" fill="url(#pageLeft)" stroke="#8a7a55" stroke-width="1.5"/>
+  <path d="M32 14 C38 9 48 8 56 10 L56 46 C48 44 38 45 32 50 Z" fill="url(#pageRight)" stroke="#8a7a55" stroke-width="1.5"/>
+
+  <path d="M13 17 Q20 15 27 18" fill="none" stroke="#8a7a55" stroke-width="1.2"/>
+  <path d="M13 24 Q20 22 27 25" fill="none" stroke="#8a7a55" stroke-width="1.2"/>
+  <path d="M13 31 Q20 29 27 32" fill="none" stroke="#8a7a55" stroke-width="1.2"/>
+
+  <path d="M37 18 Q44 15 51 17" fill="none" stroke="#8a7a55" stroke-width="1.2"/>
+  <path d="M37 25 Q44 22 51 24" fill="none" stroke="#8a7a55" stroke-width="1.2"/>
+  <path d="M37 32 Q44 29 51 31" fill="none" stroke="#8a7a55" stroke-width="1.2"/>
+
+  <rect x="30.5" y="12" width="3" height="40" fill="#d4af37"/>
+</svg>

@@ -1,0 +1,24 @@
+{
+  "name": "gospel-of-the-day",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "start": "next dev --turbopack",
+    "lint": "eslint utils app components"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.6.1",
+    "next": "^15.5.12",
+    "react": "^19.0.0",
+    "react-calendar": "^6.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.5",
+    "tailwindcss": "^4"
+  }
+}

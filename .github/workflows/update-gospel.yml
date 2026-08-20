@@ -1,0 +1,51 @@
+name: Update Gospel of the Day
+
+on:
+  schedule:
+    # 00:10 Asia/Ho_Chi_Minh (UTC+7) every day
+    - cron: '10 17 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-gospel
+  cancel-in-progress: true
+
+jobs:
+  update-gospel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout church-site
+        uses: actions/checkout@v4
+
+      - name: Checkout daily-bible
+        uses: actions/checkout@v4
+        with:
+          repository: nqminhuit/daily-bible
+          path: daily-bible
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: daily-bible/go.mod
+
+      - name: Build daily-bible CLI
+        working-directory: daily-bible
+        run: go build -tags fts5 -o ../daily-bible-cli ./cmd/cli
+
+      - name: Fetch today's Gospel
+        run: DB_PATH="daily-bible/resources/bible.db" ./daily-bible-cli today > public/gospel-today.json
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- public/gospel-today.json; then
+            git add public/gospel-today.json
+            git commit -m "chore: update Gospel of the day"
+            git push
+          else
+            echo "No change in gospel-today.json"
+          fi
