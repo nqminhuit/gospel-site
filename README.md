@@ -34,17 +34,23 @@ Open [http://localhost:3000](http://localhost:3000) in the browser to view the s
   - `page.js`: Home page (Gospel of the day + calendar), server-rendered
   - `layout.js`: Common layout
 - **components/**: Reusable components (`CalendarWrapper.jsx`, `CalendarSection.js`, `ErrorBoundary.js`)
-- **lib/**: Server-only data access — downloads and queries `daily-bible`'s SQLite database directly
+- **lib/**: Server-only data access — reads and queries the committed SQLite database directly
 - **public/**: Static assets (icons)
+- **resources/bible.db**: the app's sole data source, committed to this repo (see "Data source" below)
+- **scripts/vendor-bible-db.js**: refreshes `resources/bible.db` from a sibling checkout of `daily-bible`
 
 ## Data source
 
-The Gospel reading for any date is computed live, server-side, by querying
-[daily-bible](https://github.com/nqminhuit/daily-bible)'s SQLite database
-(`resources/bible.db`) directly:
-- `lib/bibleDbSource.js` downloads and caches a local copy of `bible.db` (TTL-based refresh, no build-time or git-commit step involved)
-- `lib/refParser.js` ports `daily-bible`'s Gospel-reference parsing (`internal/api/ref.go`) to resolve verse text
+The Gospel reading for any date is computed server-side by querying
+`resources/bible.db` directly — a SQLite database committed to this repo, not
+fetched over the network at runtime:
+- `lib/bibleDb.js` opens `resources/bible.db` read-only
+- `lib/refParser.js` ports [daily-bible](https://github.com/nqminhuit/daily-bible)'s Gospel-reference parsing (`internal/api/ref.go`) to resolve verse text
 - `lib/lectionaryKey.js` / `lib/vietnameseLabels.js` port the `lectionary_key` grammar (`internal/lectionary/types.go`) into a Vietnamese liturgical-day label
+
+To update the reading data, run `npm run vendor-bible-db` (requires a sibling
+checkout of `daily-bible`), commit the updated `resources/bible.db`, and
+redeploy — there is no automatic/scheduled refresh.
 
 Dates with no crawled Gospel reference yet in `daily-bible` show a graceful "not available" message.
 
