@@ -16,7 +16,7 @@ on:
       lookahead_days:
         description: 'How many days ahead to require readings for'
         required: false
-        default: '14'
+        default: '2'
 
 permissions:
   contents: read
@@ -36,5 +36,5 @@ jobs:
 
       - name: Check upcoming readings
         env:
-          LOOKAHEAD_DAYS: ${{ inputs.lookahead_days || '14' }}
+          LOOKAHEAD_DAYS: ${{ inputs.lookahead_days || '2' }}
         run: npm run check-readings
