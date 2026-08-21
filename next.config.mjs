@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['better-sqlite3'],
-  // Ensure the committed data snapshot (resources/bible.db) ships inside the
-  // serverless function bundle — it's only read via a runtime-computed path,
-  // so file-tracing wouldn't otherwise pick it up.
+  // sql.js does its own runtime fs/path-based asset loading (locateFile),
+  // which bundlers can mangle — keep it external rather than webpack-bundled.
+  serverExternalPackages: ['sql.js'],
+  // Ensure the committed data snapshot (resources/bible.db) and sql.js's
+  // wasm binary ship inside the serverless function bundle — both are only
+  // read via a runtime-computed path, so file-tracing wouldn't otherwise
+  // pick them up.
   outputFileTracingIncludes: {
-    '/**': ['./resources/bible.db'],
+    '/**': ['./resources/bible.db', './node_modules/sql.js/dist/sql-wasm.wasm'],
   },
 };
 

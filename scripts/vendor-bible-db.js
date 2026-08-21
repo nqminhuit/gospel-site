@@ -6,7 +6,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const Database = require('better-sqlite3');
+const { execFileSync } = require('node:child_process');
 
 const sourcePath = path.join(__dirname, '..', '..', 'daily-bible', 'resources', 'bible.db');
 const destPath = path.join(__dirname, '..', 'resources', 'bible.db');
@@ -24,10 +24,14 @@ fs.copyFileSync(sourcePath, destPath);
 // directory even to *open* the file read-only (it creates a -shm sidecar
 // for the shared-memory index). Vercel's deployment filesystem is read-only
 // outside /tmp, so switch the vendored copy to the classic rollback
-// journal — reads never need a sidecar file in that mode.
-const db = new Database(destPath);
-db.pragma('journal_mode = DELETE');
-db.close();
+// journal — reads never need a sidecar file in that mode. Requires the
+// `sqlite3` CLI locally; not a project dependency.
+try {
+  execFileSync('sqlite3', [destPath, 'PRAGMA journal_mode=DELETE;']);
+} catch (err) {
+  console.error('Failed to set journal_mode=DELETE — is the `sqlite3` CLI installed?');
+  throw err;
+}
 fs.rmSync(`${destPath}-shm`, { force: true });
 fs.rmSync(`${destPath}-wal`, { force: true });
 
