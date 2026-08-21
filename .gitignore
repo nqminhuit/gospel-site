@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# sqlite sidecar files (resources/bible.db itself is committed)
+resources/*.db-shm
+resources/*.db-wal
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

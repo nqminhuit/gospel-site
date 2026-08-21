@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next dev --turbopack",
-    "lint": "eslint utils app components"
+    "start": "next start",
+    "lint": "eslint app components lib",
+    "vendor-bible-db": "node scripts/vendor-bible-db.js"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
@@ -13,7 +15,9 @@
     "next": "^15.5.12",
     "react": "^19.0.0",
     "react-calendar": "^6.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
+    "sql.js": "^1.14.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
