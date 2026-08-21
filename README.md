@@ -38,6 +38,7 @@ Open [http://localhost:3000](http://localhost:3000) in the browser to view the s
 - **public/**: Static assets (icons)
 - **resources/bible.db**: the app's sole data source, committed to this repo (see "Data source" below)
 - **scripts/vendor-bible-db.js**: refreshes `resources/bible.db` from a sibling checkout of `daily-bible`
+- **scripts/check-readings.mjs**: daily health check for the committed database (see "Monitoring" below)
 
 ## Data source
 
@@ -53,6 +54,28 @@ checkout of `daily-bible`), commit the updated `resources/bible.db`, and
 redeploy — there is no automatic/scheduled refresh.
 
 Dates with no crawled Gospel reference yet in `daily-bible` show a graceful "not available" message.
+
+## Monitoring
+
+`resources/bible.db` is a fixed table (currently `2021-01-01` .. `2026-12-31`),
+not a rolling window, and roughly a third of its dates have no Gospel reference
+crawled upstream yet. Both failure modes are silent — the site just renders
+"Chưa có dữ liệu".
+
+`.github/workflows/check-readings.yml` runs daily at 00:10 Asia/Ho_Chi_Minh and
+fails the workflow (email notification) when data is missing, so it can be
+refreshed *before* visitors hit the gap. It checks a **window of upcoming
+days**, not just today, since by the time today is broken the site is already
+degraded. It fetches nothing and commits nothing.
+
+Run it locally with `npm run check-readings`. Two knobs, both env vars:
+- `LOOKAHEAD_DAYS` (default `14`) — how far ahead readings are required
+- `CLIFF_WARN_DAYS` (default `45`) — how early to complain that the database is running out of dates
+
+It reuses `lib/reading.js`, the same code path the page renders with, so a pass
+means the site renders. It verifies availability and internal consistency only
+— whether a `gospel_ref` is the *correct* reference for a date is `daily-bible`'s
+responsibility.
 
 ## Deployment
 Automatic deployment when pushing changes to the main branch. This is a

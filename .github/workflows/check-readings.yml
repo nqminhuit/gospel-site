@@ -1,0 +1,40 @@
+name: Check readings
+
+# Daily monitor for the committed resources/bible.db snapshot. Nothing is
+# fetched, generated, or committed here — it only fails loudly when upcoming
+# dates have no usable reading, so bible.db can be refreshed before visitors
+# hit a gap. Refreshing stays a manual step (npm run vendor-bible-db).
+
+on:
+  schedule:
+    # 17:10 UTC == 00:10 the next day in Asia/Ho_Chi_Minh (UTC+7, no DST).
+    # GitHub's scheduler is best-effort and can lag by minutes to hours under
+    # load, which is fine for a daily data check.
+    - cron: '10 17 * * *'
+  workflow_dispatch:
+    inputs:
+      lookahead_days:
+        description: 'How many days ahead to require readings for'
+        required: false
+        default: '14'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Check upcoming readings
+        env:
+          LOOKAHEAD_DAYS: ${{ inputs.lookahead_days || '14' }}
+        run: npm run check-readings
