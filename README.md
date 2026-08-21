@@ -39,6 +39,7 @@ Open [http://localhost:3000](http://localhost:3000) in the browser to view the s
 - **resources/bible.db**: the app's sole data source, committed to this repo (see "Data source" below)
 - **scripts/vendor-bible-db.js**: refreshes `resources/bible.db` from a sibling checkout of `daily-bible`
 - **scripts/check-readings.mjs**: daily health check for the committed database (see "Monitoring" below)
+- **.github/scripts/sync-bible-db.sh**: CI-only re-sync of `resources/bible.db` from `daily-bible`
 
 ## Data source
 
@@ -62,14 +63,24 @@ not a rolling window, and roughly a third of its dates have no Gospel reference
 crawled upstream yet. Both failure modes are silent — the site just renders
 "Chưa có dữ liệu".
 
-`.github/workflows/check-readings.yml` runs daily at 00:10 Asia/Ho_Chi_Minh and
-fails the workflow (email notification) when data is missing, so it can be
-refreshed *before* visitors hit the gap. It checks a **window of upcoming
-days**, not just today, since by the time today is broken the site is already
-degraded. It fetches nothing and commits nothing.
+`.github/workflows/check-readings.yml` runs daily at 00:10 Asia/Ho_Chi_Minh. It
+checks a **window of upcoming days**, not just today, since by the time today is
+broken the site is already degraded. Then:
 
-Run it locally with `npm run check-readings`. Two knobs, both env vars:
-- `LOOKAHEAD_DAYS` (default `14`) — how far ahead readings are required
+1. All readings present → done, nothing happens.
+2. Something missing → re-sync `resources/bible.db` from `daily-bible`'s master
+   branch and check again. If that fixes it, open a PR with the fresher
+   database. Merging it triggers a Vercel redeploy.
+3. Still missing after syncing → **fail the workflow** (email notification).
+   `daily-bible` doesn't have those readings either, so its `Heal missing
+   readings` workflow needs to crawl them.
+
+So being merely out of date heals itself, and you're only notified when a human
+is actually needed. The site never fetches anything at runtime — the sync runs
+in CI, and only after a check has already failed.
+
+Run the check locally with `npm run check-readings`. Two knobs, both env vars:
+- `LOOKAHEAD_DAYS` (default `2`) — how far ahead readings are required
 - `CLIFF_WARN_DAYS` (default `45`) — how early to complain that the database is running out of dates
 
 It reuses `lib/reading.js`, the same code path the page renders with, so a pass

@@ -85,11 +85,12 @@ async function main() {
   // Read inside main() so a bad value is reported by the handler below
   // instead of crashing at module load with a raw stack trace.
   //
-  // LOOKAHEAD_DAYS: how far ahead to require readings. Two weeks is enough
-  // lead time to notice, re-crawl upstream, and redeploy before a gap is
-  // visible. CLIFF_WARN_DAYS: how early to complain about the DB's last date,
-  // since extending the table is a separate upstream job (importYear).
-  const LOOKAHEAD_DAYS = intEnv('LOOKAHEAD_DAYS', 14);
+  // LOOKAHEAD_DAYS: how far ahead to require readings — enough lead time for
+  // the sync/crawl/merge cycle to finish before a gap is visible, without
+  // alerting on data that upstream legitimately hasn't published yet.
+  // CLIFF_WARN_DAYS: how early to complain about the DB's last date, since
+  // extending the table is a separate upstream job (importYear).
+  const LOOKAHEAD_DAYS = intEnv('LOOKAHEAD_DAYS', 2);
   const CLIFF_WARN_DAYS = intEnv('CLIFF_WARN_DAYS', 45);
 
   const today = todayInVietnam();
