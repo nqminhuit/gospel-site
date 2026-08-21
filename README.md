@@ -40,6 +40,7 @@ Open [http://localhost:3000](http://localhost:3000) in the browser to view the s
 - **scripts/vendor-bible-db.js**: refreshes `resources/bible.db` from a sibling checkout of `daily-bible`
 - **scripts/check-readings.mjs**: daily health check for the committed database (see "Monitoring" below)
 - **.github/scripts/sync-bible-db.sh**: CI-only re-sync of `resources/bible.db` from `daily-bible`
+- **.github/scripts/commit-db.sh**: CI-only commit of a refreshed `resources/bible.db` to `master`
 
 ## Data source
 
@@ -69,15 +70,16 @@ broken the site is already degraded. Then:
 
 1. All readings present → done, nothing happens.
 2. Something missing → re-sync `resources/bible.db` from `daily-bible`'s master
-   branch and check again. If that fixes it, open a PR with the fresher
-   database. Merging it triggers a Vercel redeploy.
+   branch, check again, and commit the fresher database directly to `master`,
+   which triggers a Vercel redeploy. No PR and no approval — a data refresh has
+   nothing to review, and waiting on a merge is what let gaps reach the site.
 3. Still missing after syncing → **fail the workflow** (email notification).
    `daily-bible` doesn't have those readings either, so its `Heal missing
    readings` workflow needs to crawl them.
 
-So being merely out of date heals itself, and you're only notified when a human
-is actually needed. The site never fetches anything at runtime — the sync runs
-in CI, and only after a check has already failed.
+So being merely out of date heals itself with no human in the loop, and you're
+only notified when a person is actually needed. The site never fetches anything
+at runtime — the sync runs in CI, and only after a check has already failed.
 
 Run the check locally with `npm run check-readings`. Two knobs, both env vars:
 - `LOOKAHEAD_DAYS` (default `2`) — how far ahead readings are required
