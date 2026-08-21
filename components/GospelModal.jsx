@@ -28,8 +28,8 @@ export default function GospelModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-3xl mx-4
-                   bg-white rounded-2xl shadow-2xl
+        className="relative w-full max-w-3xl mx-4 sm:mx-6
+                   bg-stone-50 rounded-2xl shadow-2xl
                    max-h-[85vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -37,16 +37,16 @@ export default function GospelModal({
         <div className="h-2 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600" />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="font-serif text-xl font-semibold text-gray-900">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-200">
+          <h3 className="font-serif text-lg sm:text-xl font-semibold text-gray-900">
             {citation || 'Lời Chúa'}
           </h3>
 
           <button
             aria-label="Close"
             onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center
-                       rounded-full hover:bg-gray-100
+            className="w-9 h-9 flex items-center justify-center shrink-0
+                       rounded-full hover:bg-gray-200
                        text-gray-400 hover:text-gray-900
                        transition cursor-pointer"
           >
@@ -55,7 +55,7 @@ export default function GospelModal({
         </div>
 
         {/* Content */}
-        <div className="px-6 py-6 overflow-y-auto max-h-[70vh]">
+        <div className="px-5 sm:px-6 py-6 overflow-y-auto max-h-[70vh]">
           {loading && (
             <div className="text-center py-10 text-gray-500">
               Đang tải Lời Chúa…
@@ -69,7 +69,7 @@ export default function GospelModal({
           )}
 
           {!loading && !error && content && (
-            <div className="prose prose-gray max-w-none whitespace-pre-line
+            <div className="font-serif max-w-none whitespace-pre-line
                             text-gray-800 leading-8 text-justify">
               {content}
             </div>

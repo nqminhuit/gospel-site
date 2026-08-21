@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+}
+
+html {
+  color-scheme: light;
+}
+
+.react-calendar__tile {
+  padding: 0.6em 0.3em;
+}
+
+.react-calendar__navigation button {
+  min-width: 40px;
+  border-radius: 0.5rem;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus,
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
+}

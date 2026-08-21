@@ -5,7 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 
 export default function CalendarSection({date, onChange}) {
   return (
-    <div>
+    <div className="rounded-2xl border border-emerald-200/70 bg-stone-50 shadow-lg shadow-emerald-900/5 p-2">
       <Calendar
         onChange={onChange}
         value={date}
@@ -16,9 +16,9 @@ export default function CalendarSection({date, onChange}) {
           year: 'numeric',
         })}`}
         tileClassName={({ date: tileDate }) => tileDate.toDateString() === date.toDateString()
-          ? '!bg-green-500 !text-white !rounded-full'
+          ? '!bg-emerald-600 !text-white !rounded-full !font-semibold'
           : '!rounded-full'}
-        className="rounded-md shadow-lg p-1" />
+        className="!w-full !border-0 !bg-transparent !text-sm sm:!text-base" />
     </div>
   );
 }
