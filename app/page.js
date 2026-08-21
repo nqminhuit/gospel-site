@@ -1,25 +1,19 @@
 import CalendarWrapper from '@/components/CalendarWrapper';
 import { getReadingForDate, BibleDbUnavailableError } from '@/lib/reading';
+import { isValidDateStr, formatVi } from '@/lib/date';
 import 'react-calendar/dist/Calendar.css';
 
 export const dynamic = 'force-dynamic';
 
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
 function todayInVietnam() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
-}
-
-function formatVi(dateStr) {
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
 }
 
 export default async function HomePage({ searchParams }) {
   const params = await searchParams;
   const todayStr = todayInVietnam();
   const selectedDateStr =
-    typeof params?.date === 'string' && DATE_RE.test(params.date) ? params.date : todayStr;
+    typeof params?.date === 'string' && isValidDateStr(params.date) ? params.date : todayStr;
   const isTodaySelected = selectedDateStr === todayStr;
 
   let reading = { date: selectedDateStr, notFound: true };

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import CalendarSection from './CalendarSection';
+import { formatVi } from '@/lib/date';
 
 function parseDateOnly(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -29,7 +30,7 @@ export default function CalendarWrapper({ selectedDateStr, isTodaySelected }) {
       <CalendarSection date={selectedDate} onChange={handleChange} />
       <div className="flex items-center justify-center gap-3 text-sm text-neutral-600">
         <span>
-          Ngày được chọn: <strong className="text-neutral-800">{selectedDate.toLocaleDateString('vi-VN')}</strong>
+          Ngày được chọn: <strong className="text-neutral-800">{formatVi(selectedDateStr)}</strong>
         </span>
         {!isTodaySelected && (
           <button
