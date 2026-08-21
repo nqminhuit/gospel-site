@@ -31,21 +31,27 @@ Open [http://localhost:3000](http://localhost:3000) in the browser to view the s
 ## Project Structure
 
 - **app/**: Next.js pages (app router)
-  - `page.js`: Home page (Gospel of the day + calendar)
+  - `page.js`: Home page (Gospel of the day + calendar), server-rendered
   - `layout.js`: Common layout
-- **components/**: Reusable components (`GospelModal.jsx`, `CalendarSection.js`, `ErrorBoundary.js`)
+- **components/**: Reusable components (`CalendarWrapper.jsx`, `CalendarSection.js`, `ErrorBoundary.js`)
+- **lib/**: Server-only data access — downloads and queries `daily-bible`'s SQLite database directly
 - **public/**: Static assets (icons)
-- **utils/**: Utility functions (fetching + caching Gospel data)
 
 ## Data source
 
-Liturgical calendar and Gospel text are fetched from https://github.com/nqminhuit/liturgical-calendar:
-- `resources/liturgical-calendar-<year>.json` and `resources/vietnam-liturgical-calendar-<year>.json`
-- `resources/lectionary.json` (maps lectionary keys to Gospel references, one-time work reused every year)
-- `resources/gospel.json` (full Gospel text keyed by reference)
+The Gospel reading for any date is computed live, server-side, by querying
+[daily-bible](https://github.com/nqminhuit/daily-bible)'s SQLite database
+(`resources/bible.db`) directly:
+- `lib/bibleDbSource.js` downloads and caches a local copy of `bible.db` (TTL-based refresh, no build-time or git-commit step involved)
+- `lib/refParser.js` ports `daily-bible`'s Gospel-reference parsing (`internal/api/ref.go`) to resolve verse text
+- `lib/lectionaryKey.js` / `lib/vietnameseLabels.js` port the `lectionary_key` grammar (`internal/lectionary/types.go`) into a Vietnamese liturgical-day label
+
+Dates with no crawled Gospel reference yet in `daily-bible` show a graceful "not available" message.
 
 ## Deployment
-Automatic deployment when pushing changes to the main branch
+Automatic deployment when pushing changes to the main branch. This is a
+server-rendered (SSR) app — production requires `next start` (or Vercel's
+standard Next.js SSR deploy), not a static file server.
 
 ### Manual Deployment Steps
 1. Build production:
@@ -53,9 +59,9 @@ Automatic deployment when pushing changes to the main branch
  npm run build
  ```
 
-2. Start server (dev):
+2. Start server:
  ```bash
- (cd out && python -m http.server 8000)
+ npm start
  ```
 
 ## Contributing
