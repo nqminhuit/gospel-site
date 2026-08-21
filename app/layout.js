@@ -46,10 +46,6 @@ export default function RootLayout({ children }) {
           </ErrorBoundary>
         </main>
 
-        <footer className="text-center text-xs text-neutral-400 py-6">
-          Lời Chúa hằng ngày · dữ liệu phụng vụ &amp; Tin Mừng theo lịch Công Giáo
-        </footer>
-
         <Analytics />
         <SpeedInsights />
       </body>
