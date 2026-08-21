@@ -29,8 +29,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="vi" className={`${inter.variable} ${merriweather.variable}`}>
-      <body className="font-sans flex flex-col min-h-screen bg-gradient-to-b from-emerald-50 via-white to-white text-neutral-900 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-900 dark:text-neutral-100">
-        <header className="sticky top-0 z-30 bg-emerald-800 text-white shadow-md dark:bg-emerald-950">
+      <body className="font-sans flex flex-col min-h-screen bg-stone-100 text-neutral-800">
+        <header className="sticky top-0 z-30 bg-emerald-800 text-white shadow-md">
           <div className="max-w-6xl mx-auto py-3 px-4 flex items-center gap-2.5">
             <span className="text-2xl leading-none">📖</span>
             <div className="leading-tight">
@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
           </ErrorBoundary>
         </main>
 
-        <footer className="text-center text-xs text-neutral-400 py-6 dark:text-neutral-600">
+        <footer className="text-center text-xs text-neutral-400 py-6">
           Lời Chúa hằng ngày · dữ liệu phụng vụ &amp; Tin Mừng theo lịch Công Giáo
         </footer>
 

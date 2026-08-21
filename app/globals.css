@@ -6,7 +6,7 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 .react-calendar__tile {
@@ -23,18 +23,4 @@ html {
 .react-calendar__tile:enabled:hover,
 .react-calendar__tile:enabled:focus {
   background-color: color-mix(in srgb, currentColor 10%, transparent);
-}
-
-@media (prefers-color-scheme: dark) {
-  .react-calendar,
-  .react-calendar__navigation button,
-  .react-calendar__month-view__weekdays,
-  abbr {
-    color: #e5e5e5;
-  }
-
-  .react-calendar__tile:disabled {
-    color: #6b7280;
-    background: transparent;
-  }
 }

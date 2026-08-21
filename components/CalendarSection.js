@@ -5,7 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 
 export default function CalendarSection({date, onChange}) {
   return (
-    <div className="rounded-2xl border border-emerald-200/70 bg-white shadow-lg shadow-emerald-900/5 p-2 dark:border-emerald-900/60 dark:bg-neutral-900">
+    <div className="rounded-2xl border border-emerald-200/70 bg-stone-50 shadow-lg shadow-emerald-900/5 p-2">
       <Calendar
         onChange={onChange}
         value={date}
