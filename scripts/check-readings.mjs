@@ -68,6 +68,12 @@ function diagnose(db, dateStr) {
   if (!row.gospel_ref) {
     return `lectionary_key=${row.lectionary_key}, but gospel_ref is NULL — reading not crawled yet upstream`;
   }
+  const hasSources = queryOne(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='daily_reading_sources'");
+  const source = hasSources && queryOne(db, `SELECT * FROM daily_reading_sources WHERE date = ?`, [dateStr]);
+  const expectedUrl = `https://www.vaticannews.va/vi/loi-chua-hang-ngay/${dateStr.replaceAll('-', '/')}.html`;
+  if (!source || source.gospel_ref !== row.gospel_ref || source.source_date !== dateStr || source.source_url !== expectedUrl || !source.verified_at) {
+    return `no matching exact-date source verification for ${dateStr} — calendar estimates are not Mass readings`;
+  }
   try {
     parseRef(row.gospel_ref);
   } catch (e) {

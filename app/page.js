@@ -45,13 +45,24 @@ export default async function HomePage({ searchParams }) {
           {dbUnavailable ? (
             <p className="text-neutral-600">Không thể tải Lời Chúa lúc này. Vui lòng thử lại sau.</p>
           ) : reading.notFound ? (
-            <p className="text-neutral-600">Chưa có dữ liệu Lời Chúa cho ngày này.</p>
+            <p className="text-neutral-600">Chưa có bài Tin Mừng được xác minh cho ngày này.</p>
           ) : (
             <>
               <blockquote className="font-serif max-w-2xl mx-auto whitespace-pre-line text-neutral-800 leading-8 text-justify text-[0.95rem] sm:text-base">
                 {reading.verses}
               </blockquote>
               <cite className="not-italic text-sm text-neutral-500 mt-3 block">({reading.ref})</cite>
+              <a
+                href={reading.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-emerald-700 mt-2 underline"
+              >
+                Nguồn: Vatican News · {formatVi(selectedDateStr)}
+              </a>
+              <p className="text-xs text-neutral-500 mt-2">
+                Bài đọc theo Vatican News (tiếng Việt). Lễ riêng và các lựa chọn trong Thánh lễ có thể khác.
+              </p>
               {reading.label && (
                 <p className="inline-block text-sm text-emerald-800 font-semibold mt-3 px-3 py-1 rounded-full bg-emerald-100/70">
                   {reading.label}
