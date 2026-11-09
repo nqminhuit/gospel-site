@@ -4,7 +4,7 @@ A small Next.js 15 / React 19 site that displays the daily Gospel reading (Tin M
 
 ## Purpose
 
-- Show a Gospel reference verified against the exact dated Vietnamese Vatican News page, not inferred from a calendar key
+- Show an evidence-backed Gospel selection using either accepted exact-date evidence or a supported calendar plus a reviewed reusable entry; never infer it from an estimated seasonal key
 - Let visitors pick another date on the calendar to read that day's Gospel
 
 ## Installation and Running
@@ -44,60 +44,87 @@ Open [http://localhost:3000](http://localhost:3000) in the browser to view the s
 
 ## Data source
 
-The Gospel reading for any date is computed server-side by querying
-`resources/bible.db` directly — a SQLite database committed to this repo, not
-fetched over the network at runtime:
-- `lib/bibleDb.js` opens `resources/bible.db` read-only
-- `lib/refParser.js` ports [daily-bible](https://github.com/nqminhuit/daily-bible)'s Gospel-reference parsing (`internal/api/ref.go`) to resolve verse text
-- `lib/reading.js` requires `daily_reading_sources` provenance matching the exact date, current ref, canonical dated source URL, and verification timestamp
-- A celebration label is displayed only when a reviewed `celebration` is stored with the source; `lectionary_key` is an estimate and is not used to label the Mass
-- The page links the exact source and explains that parish-specific celebrations or permitted reading alternatives may differ; Vietnamese language alone does not establish a Vietnamese national/diocesan calendar
-- Confirm the target calendar before archive-wide repairs; unresolved local/source conflicts remain unavailable rather than silently choosing a normal weekday or Sunday
+The page queries the committed `resources/bible.db` directly with `sql.js`; it
+never fetches a Gospel or calls the Go API at runtime. `lib/bibleDb.js` opens the
+snapshot read-only; `DB_PATH` can select a temporary snapshot for tests.
+`lib/refParser.js` matches `daily-bible/internal/scripture` parsing/query semantics
+and rejects missing/partial verse text.
 
-To update the reading data, run `npm run vendor-bible-db` (requires a sibling
-checkout of `daily-bible`), commit the updated `resources/bible.db`, and
-redeploy. The scheduled monitor below also syncs on a verification gap.
+`lib/reading.js` implements the shared evidence contract:
 
-Dates without matching exact-date provenance show a graceful "not verified yet"
-message, even if a legacy calendar-derived reference is present. Historical refs
-are preserved upstream for audit, but need incremental verification before being
-served again. Publish the new provenance-bearing snapshot together with this
-frontend change. `npm test` covers rejection of legacy/stale/wrong-date sources
-and suppression of predicted celebration labels.
+- Default `READING_CALENDAR=vatican-vi`: matching accepted exact-date provenance,
+  canonical dated source URL, reference and timestamp. A later conflicting
+  observation of that same source is unavailable pending review.
+- Explicit `roman-general` or `vietnam`: current versioned calendar definition plus
+  a reviewed reusable entry; a scoped date-specific acceptance takes precedence.
+  An existing stale date decision blocks silent fallback to an ordinary entry.
+- Only `READING_MASS_OPTION=day` is currently supported. Other options, missing
+  definitions/reviews, unsupported dates and incomplete text are unavailable.
+- No fallback across calendar scopes, stale rules, or estimated `lectionary_key`
+  values. A different-calendar observation cannot poison a reviewed local entry.
+- Labels come from the resolved observance/reviewed date, never a seasonal guess.
+  The UI distinguishes `source_checked` from `calendar_resolved` and links the
+  **actual evidence**, potentially from another year, not an invented future page.
+
+Profiles are candidate policies, not confirmation of this site's national,
+diocesan or parish calendar. Vietnamese source language proves no jurisdiction.
+Confirm calendar scope, default options and local exceptions before activating a
+profile or repairing the full archive. See the upstream
+[policy and operator contract](https://github.com/nqminhuit/daily-bible/blob/master/data/calendar-policy.md).
+The November 15, 2026 calendar discrepancy is not automatically resolved.
+
+A supported warm cache renders historical/future dates without dated-page records
+or HTTP. Legacy references remain audit data, not automatically approved readings.
+`npm test` covers both resolution methods, scope/version isolation, genuine
+citations, date-only exceptions, strict parsing and complete verse ranges.
+
+To refresh data, use `npm run vendor-bible-db` with a sibling `daily-bible` checkout,
+then review and commit the snapshot. Coordinate schema compatibility and rollback
+snapshots with upstream; publishing the Go implementation alone does not update
+this frontend. Never publish an almost-empty archive merely to satisfy a new
+provenance check. Production and CI must set the same `READING_CALENDAR`.
 
 ## Monitoring
 
-`resources/bible.db` is a fixed table (currently `2021-01-01` .. `2026-12-31`),
-not a rolling window. A non-null reference is insufficient: missing verse text,
-missing provenance, or a source/calendar conflict all make a reading unavailable.
-The archive needs incremental verification; old predictions are not grandfathered
-in as confirmed readings.
+The snapshot is not a rolling runtime download. Stored date count/non-null refs
+are not availability guarantees: inspect supported calendar definitions, reviews,
+conflicts and verse completeness. Archive recovery should reuse approved entries,
+not require one crawl per historical date or grandfather all old predictions.
 
 `.github/workflows/check-readings.yml` runs daily at 00:10 Asia/Ho_Chi_Minh. It
 checks a **window of upcoming days**, not just today, since by the time today is
 broken the site is already degraded. Then:
 
-1. All readings have matching exact-date provenance and verse text → done, nothing happens.
+1. All dates have supported scoped evidence and complete text → done; no crawl is needed.
 2. Something missing → re-sync `resources/bible.db` from `daily-bible`'s master
    branch, check again, and commit the fresher database directly to `master`,
-   which triggers a Vercel redeploy. No PR and no approval — a data refresh has
-   nothing to review, and waiting on a merge is what let gaps reach the site.
+   which triggers a Vercel redeploy. This may import only upstream's reviewed,
+   compatible data; it does not itself approve predictions or calendar changes.
 3. Still missing after syncing → **fail the workflow** (email notification).
-   `daily-bible` doesn't have those readings either, so its `Heal missing
-   readings` workflow needs to crawl them.
+   Upstream needs the missing calendar/entry/date review or a verse-store repair.
+   The healer crawls only genuine reference gaps; a crawl alone cannot approve a
+   local-calendar selection.
 
 So being merely out of date heals itself with no human in the loop, and you're
 only notified when a person is actually needed. The site never fetches anything
 at runtime — the sync runs in CI, and only after a check has already failed.
 
-Run the check locally with `npm run check-readings`. Two knobs, both env vars:
+Run `npm run check-readings`. Set repository variable `READING_CALENDAR` to match
+production (default `vatican-vi`). For a temporary reviewed-cache snapshot:
+
+```sh
+DB_PATH=/tmp/reading-audit.db READING_CALENDAR=roman-general npm run check-readings
+```
+
+Additional environment settings:
 - `LOOKAHEAD_DAYS` (default `2`) — how far ahead readings are required
 - `CLIFF_WARN_DAYS` (default `45`) — how early to complain that the database is running out of dates
 
 It reuses `lib/reading.js`, the same code path the page renders with, so a pass
-means the site renders a source-verified reference. It verifies exact-date provenance, availability, and internal consistency
-— whether a `gospel_ref` is the *correct* reference for a date is `daily-bible`'s
-responsibility.
+means the page has supported evidence and complete text. It diagnoses missing
+reviews/definitions rather than demanding per-date crawls. Liturgical correctness
+still depends on the explicitly approved upstream calendar, scope and mappings.
+Scheduled source audits are separate from these availability checks.
 
 ## Deployment
 Automatic deployment when pushing changes to the main branch. This is a

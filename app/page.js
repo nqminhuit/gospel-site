@@ -58,10 +58,14 @@ export default async function HomePage({ searchParams }) {
                 rel="noopener noreferrer"
                 className="block text-sm text-emerald-700 mt-2 underline"
               >
-                Nguồn: Vatican News · {formatVi(selectedDateStr)}
+                {reading.calendarId === 'vatican-vi' ? 'Nguồn: Vatican News' : reading.resolutionMethod === 'source_checked' ? 'Nguồn đối chiếu theo ngày' : 'Nguồn tham chiếu của bài đọc'}
+                {reading.evidenceDate ? ` · ${formatVi(reading.evidenceDate)}` : ''}
               </a>
               <p className="text-xs text-neutral-500 mt-2">
-                Bài đọc theo Vatican News (tiếng Việt). Lễ riêng và các lựa chọn trong Thánh lễ có thể khác.
+                {reading.resolutionMethod === 'calendar_resolved'
+                  ? `Bài đọc được tra theo lịch ${reading.calendarId === 'roman-general' ? 'Rô-ma chung' : reading.calendarId === 'vietnam' ? 'Việt Nam (Romcal)' : reading.calendarId}, từ mục đã được đối chiếu.`
+                  : reading.calendarId === 'vatican-vi' ? 'Bài đọc theo Vatican News (tiếng Việt).' : 'Bài đọc được đối chiếu riêng theo ngày và lịch đã chọn.'}
+                {' '}Lễ riêng và các lựa chọn trong Thánh lễ có thể khác.
               </p>
               {reading.label && (
                 <p className="inline-block text-sm text-emerald-800 font-semibold mt-3 px-3 py-1 rounded-full bg-emerald-100/70">

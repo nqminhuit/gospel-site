@@ -27,6 +27,8 @@ permissions:
 
 env:
   LOOKAHEAD_DAYS: ${{ inputs.lookahead_days || '2' }}
+  # Must match the explicitly approved READING_CALENDAR in the deployment.
+  READING_CALENDAR: ${{ vars.READING_CALENDAR || 'vatican-vi' }}
 
 jobs:
   check:

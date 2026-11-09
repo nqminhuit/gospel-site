@@ -59,6 +59,16 @@ function daysBetween(fromStr, toStr) {
  * workflow log names the fix instead of just the symptom.
  */
 function diagnose(db, dateStr) {
+  const calendar = process.env.READING_CALENDAR || 'vatican-vi';
+  if (calendar !== 'vatican-vi') {
+    if (!queryOne(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='reading_calendars'")) return `calendar ${calendar} is not installed upstream`;
+    const decision = queryOne(db, 'SELECT review_id FROM reading_date_acceptances WHERE calendar_id=? AND date=? AND mass_option=?', [calendar, dateStr, process.env.READING_MASS_OPTION || 'day']);
+    if (decision) return 'date-specific selection needs valid current evidence and complete verse text; never fall back silently to the weekday';
+    const day = queryOne(db, `SELECT d.* FROM reading_calendar_days d JOIN reading_calendars c ON c.calendar_id=d.calendar_id AND c.rules_version=d.rules_version WHERE d.calendar_id=? AND d.date=? AND d.mass_option='day'`, [calendar, dateStr]);
+    if (!day?.entry_key) return `no supported default daytime Mass for ${dateStr} in calendar ${calendar}`;
+    const entry = queryOne(db, `SELECT review_id FROM reading_entries WHERE calendar_id=? AND rules_version=? AND entry_key=? AND mass_option='day'`, [calendar, day.rules_version, day.entry_key]);
+    return entry ? `entry ${day.entry_key} has invalid/stale evidence or incomplete verse text — audit upstream` : `entry ${day.entry_key} needs an explicit reviewed Gospel mapping upstream; do not infer it from the legacy key`;
+  }
   const row = queryOne(db, 'SELECT lectionary_key, gospel_ref FROM daily_readings WHERE date = ?', [
     dateStr,
   ]);
@@ -128,6 +138,10 @@ async function main() {
         failures.push({ date, reason: diagnose(db, date) });
         continue;
       }
+      if (!reading.verified || !['source_checked', 'calendar_resolved'].includes(reading.resolutionMethod)) {
+        failures.push({ date, reason: 'reading has no supported resolution method' });
+        continue;
+      }
       if (!reading.verses || reading.verses.trim() === '') {
         failures.push({ date, reason: 'resolved to empty verse text' });
         continue;
@@ -138,7 +152,12 @@ async function main() {
     }
 
     // The DB is a fixed table, not a rolling window — warn before it runs out.
-    maxDate = queryOne(db, 'SELECT MAX(date) AS d FROM daily_readings')?.d ?? null;
+    const calendar = process.env.READING_CALENDAR || 'vatican-vi';
+    maxDate = calendar === 'vatican-vi'
+      ? queryOne(db, 'SELECT MAX(date) AS d FROM daily_readings')?.d ?? null
+      : queryOne(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='reading_calendars'")
+        ? queryOne(db, `SELECT MAX(d.date) AS d FROM reading_calendar_days d JOIN reading_calendars c ON c.calendar_id=d.calendar_id AND c.rules_version=d.rules_version WHERE d.calendar_id=? AND d.mass_option='day'`, [calendar])?.d ?? null
+        : null;
     cliffDays = maxDate ? daysBetween(today, maxDate) : null;
     cliffTooClose = cliffDays !== null && cliffDays < CLIFF_WARN_DAYS;
   } finally {
