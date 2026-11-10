@@ -63,10 +63,15 @@ export default async function HomePage({ searchParams }) {
               </a>
               <p className="text-xs text-neutral-500 mt-2">
                 {reading.resolutionMethod === 'calendar_resolved'
-                  ? `Bài đọc được tra theo lịch ${reading.calendarId === 'roman-general' ? 'Rô-ma chung' : reading.calendarId === 'vietnam' ? 'Việt Nam (Romcal)' : reading.calendarId}, từ mục đã được đối chiếu.`
+                  ? `Bài đọc được tra theo lịch ${reading.calendarId === 'roman-general' ? 'Rô-ma chung' : reading.calendarId === 'vietnam' ? (reading.rulesVersion?.startsWith('vietnam-national-pilot-') ? 'Việt Nam (bản thử nghiệm, phạm vi hạn chế)' : 'Việt Nam') : reading.calendarId}, từ mục đã được đối chiếu.`
                   : reading.calendarId === 'vatican-vi' ? 'Bài đọc theo Vatican News (tiếng Việt).' : 'Bài đọc được đối chiếu riêng theo ngày và lịch đã chọn.'}
                 {' '}Lễ riêng và các lựa chọn trong Thánh lễ có thể khác.
               </p>
+              {reading.calendarSourceUrl && (
+                <a href={reading.calendarSourceUrl} target="_blank" rel="noopener noreferrer" className="block text-xs text-emerald-700 mt-2 underline">
+                  Nguồn lịch được sử dụng
+                </a>
+              )}
               {reading.label && (
                 <p className="inline-block text-sm text-emerald-800 font-semibold mt-3 px-3 py-1 rounded-full bg-emerald-100/70">
                   {reading.label}

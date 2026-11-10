@@ -85,8 +85,18 @@ coverage before activating a profile or repairing the archive. See the upstream
 [policy and operator contract](https://github.com/nqminhuit/daily-bible/blob/master/data/calendar-policy.md)
 and partial `data/vietnam-national-sources.json` dossier. Its 2026 Ash Mass
 transfer does not move Lent/the Hours, and its conditional Ascension template
-does not establish one default schedule. November 15's national
-celebration/default formulary is not automatically resolved.
+does not establish one default schedule. The explicit upstream **2026 national
+pilot** implements nine sourced definitions and marks the remaining 356 dates
+unsupported; only two Gospel mappings were reviewed on a temporary demonstration
+copy. It is not production coverage and must not be activated by sync/deploy jobs.
+November 15's national celebration/default formulary remains unresolved.
+
+Schema-3 definitions and migration 005 separate the assigned Mass from its
+underlying observance/seasons and preserve each day's precise directive URL and
+scope note. Pilot-derived warm entries require matching definition evidence.
+The page links Gospel evidence separately from calendar evidence and identifies
+the limited pilot honestly, without calling it the rejected Romcal Vietnam
+provider. Underlying calendar context is not an implemented Hours calendar.
 
 A supported warm cache renders historical/future dates without dated-page records
 or HTTP. Legacy references remain audit data, not automatically approved readings.
