@@ -10,17 +10,16 @@
 // "the check passes" means "the site renders". There is no second
 // implementation here that could drift from the real one.
 //
-// Scope: availability and internal consistency only. Whether a gospel_ref is
-// the *right* reference for a date is upstream's business (daily-bible crawls
-// it from vaticannews.va); verifying that here would mean re-implementing
-// ~270 lines of HTML extraction that breaks whenever their markup changes.
+// Scope: availability and internal consistency only. Liturgical correctness
+// depends on the approved upstream calendar, scoped reviews, and passage audits.
+// Rendering and diagnostics share one evidence/text path; no source fetch or
+// independent calendar/parser implementation belongs in this availability check.
 //
 // Must run with --conditions=react-server so the `server-only` guard in lib/
 // resolves to a no-op instead of throwing.
 
-import { getReadingForDate, BibleDbUnavailableError } from '../lib/reading.js';
+import { readVerifiedReading, diagnoseReading, BibleDbUnavailableError } from '../lib/reading.js';
 import { openDb, queryOne } from '../lib/bibleDb.js';
-import { parseRef } from '../lib/refParser.js';
 
 const TZ = 'Asia/Ho_Chi_Minh';
 
@@ -53,45 +52,6 @@ function daysBetween(fromStr, toStr) {
   return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / 86400000);
 }
 
-/**
- * getReadingForDate() collapses every failure into `notFound` — right for the
- * page, useless for an alert. Re-query to say *why* it's missing, so the
- * workflow log names the fix instead of just the symptom.
- */
-function diagnose(db, dateStr) {
-  const calendar = process.env.READING_CALENDAR || 'vatican-vi';
-  if (calendar !== 'vatican-vi') {
-    if (!queryOne(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='reading_calendars'")) return `calendar ${calendar} is not installed upstream`;
-    const decision = queryOne(db, 'SELECT review_id FROM reading_date_acceptances WHERE calendar_id=? AND date=? AND mass_option=?', [calendar, dateStr, process.env.READING_MASS_OPTION || 'day']);
-    if (decision) return 'date-specific selection needs valid current evidence and complete verse text; never fall back silently to the weekday';
-    const day = queryOne(db, `SELECT d.* FROM reading_calendar_days d JOIN reading_calendars c ON c.calendar_id=d.calendar_id AND c.rules_version=d.rules_version WHERE d.calendar_id=? AND d.date=? AND d.mass_option='day'`, [calendar, dateStr]);
-    if (!day?.entry_key) return `no supported default daytime Mass for ${dateStr} in calendar ${calendar}`;
-    const entry = queryOne(db, `SELECT review_id FROM reading_entries WHERE calendar_id=? AND rules_version=? AND entry_key=? AND mass_option='day'`, [calendar, day.rules_version, day.entry_key]);
-    return entry ? `entry ${day.entry_key} has invalid/stale evidence or incomplete verse text — audit upstream` : `entry ${day.entry_key} needs an explicit reviewed Gospel mapping upstream; do not infer it from the legacy key`;
-  }
-  const row = queryOne(db, 'SELECT lectionary_key, gospel_ref FROM daily_readings WHERE date = ?', [
-    dateStr,
-  ]);
-  if (!row) {
-    return 'no row in daily_readings — date is outside the DB range (extend it upstream with importYear)';
-  }
-  if (!row.gospel_ref) {
-    return `lectionary_key=${row.lectionary_key}, but gospel_ref is NULL — reading not crawled yet upstream`;
-  }
-  const hasSources = queryOne(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='daily_reading_sources'");
-  const source = hasSources && queryOne(db, `SELECT * FROM daily_reading_sources WHERE date = ?`, [dateStr]);
-  const expectedUrl = `https://www.vaticannews.va/vi/loi-chua-hang-ngay/${dateStr.replaceAll('-', '/')}.html`;
-  if (!source || source.gospel_ref !== row.gospel_ref || source.source_date !== dateStr || source.source_url !== expectedUrl || !source.verified_at) {
-    return `no matching exact-date source verification for ${dateStr} — calendar estimates are not Mass readings`;
-  }
-  try {
-    parseRef(row.gospel_ref);
-  } catch (e) {
-    return `gospel_ref "${row.gospel_ref}" does not parse: ${e.message}`;
-  }
-  return `gospel_ref "${row.gospel_ref}" parses but matches no rows in verses — verse text is missing (re-run the verses crawler upstream)`;
-}
-
 function annotate(level, message) {
   // GitHub renders these as inline annotations on the run summary.
   if (process.env.GITHUB_ACTIONS) console.log(`::${level}::${message}`);
@@ -105,9 +65,11 @@ async function main() {
   // the sync/crawl/merge cycle to finish before a gap is visible, without
   // alerting on data that upstream legitimately hasn't published yet.
   // CLIFF_WARN_DAYS: how early to complain about the DB's last date, since
-  // extending the table is a separate upstream job (importYear).
+  // extending supported calendar definitions/evidence is a separate upstream
+  // operation; generating legacy importYear estimates does not approve readings.
   const LOOKAHEAD_DAYS = intEnv('LOOKAHEAD_DAYS', 2);
   const CLIFF_WARN_DAYS = intEnv('CLIFF_WARN_DAYS', 45);
+  const calendar = process.env.READING_CALENDAR || 'vatican-vi';
 
   const today = todayInVietnam();
   const dates = Array.from({ length: LOOKAHEAD_DAYS + 1 }, (_, i) => addDays(today, i));
@@ -125,17 +87,15 @@ async function main() {
     for (const date of dates) {
       let reading;
       try {
-        reading = await getReadingForDate(date);
+        // One consistent in-memory snapshot for the full check and diagnostics.
+        reading = readVerifiedReading(db, date);
       } catch (e) {
-        // A BibleDbUnavailableError here means the file itself is gone or
-        // unreadable — nothing date-specific left to check, so stop.
-        if (e instanceof BibleDbUnavailableError) throw e;
         failures.push({ date, reason: `threw: ${e.message}` });
         continue;
       }
 
       if (reading.notFound) {
-        failures.push({ date, reason: diagnose(db, date) });
+        failures.push({ date, reason: diagnoseReading(db, date) });
         continue;
       }
       if (!reading.verified || !['source_checked', 'calendar_resolved'].includes(reading.resolutionMethod)) {
@@ -152,7 +112,6 @@ async function main() {
     }
 
     // The DB is a fixed table, not a rolling window — warn before it runs out.
-    const calendar = process.env.READING_CALENDAR || 'vatican-vi';
     maxDate = calendar === 'vatican-vi'
       ? queryOne(db, 'SELECT MAX(date) AS d FROM daily_readings')?.d ?? null
       : queryOne(db, "SELECT name FROM sqlite_master WHERE type='table' AND name='reading_calendars'")
@@ -171,17 +130,20 @@ async function main() {
       console.log(`  ${f.date}: ${f.reason}`);
       annotate('error', `${f.date}: ${f.reason}`);
     }
-    console.log('\nFix: refresh resources/bible.db from daily-bible (npm run vendor-bible-db), then commit.');
+    console.log('\nNext: review the scoped diagnosis upstream. Re-sync only a reviewed compatible snapshot (npm run vendor-bible-db); another crawl or legacy-key import does not approve a reading.');
   }
 
   if (cliffTooClose) {
-    const msg = `bible.db ends at ${maxDate}, only ${cliffDays} day(s) away — extend the table upstream (importYear) before it runs out`;
+    const action = calendar === 'vatican-vi'
+      ? 'extend upstream source-policy dates and reviewed evidence'
+      : 'import the next year\'s supported calendar definitions upstream; legacy importYear estimates are not sufficient';
+    const msg = `stored date range ends at ${maxDate}, only ${cliffDays} day(s) away — ${action}`;
     console.log(`\n${msg}`);
     annotate('error', msg);
   }
 
   if (failures.length === 0 && !cliffTooClose) {
-    console.log(`PASS — all ${dates.length} day(s) render, data runs through ${maxDate} (${cliffDays} days).`);
+    console.log(`PASS — all ${dates.length} day(s) render (checked window only). Stored date rows/definitions end at ${maxDate ?? '(no imported range)'}; this is not an archive reading-coverage guarantee.`);
     return 0;
   }
   return 1;

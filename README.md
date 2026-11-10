@@ -128,9 +128,17 @@ Additional environment settings:
 - `LOOKAHEAD_DAYS` (default `2`) — how far ahead readings are required
 - `CLIFF_WARN_DAYS` (default `45`) — how early to complain that the database is running out of dates
 
+The reported end date counts stored rows/definitions, not trusted archive coverage.
+For calendar-managed readings, extend supported definitions upstream; generating
+legacy `importYear` estimates does not extend trusted resolution. A passing check
+certifies only its checked window, not every date through that end date.
+
 It reuses `lib/reading.js`, the same code path the page renders with, so a pass
-means the page has supported evidence and complete text. It diagnoses missing
-reviews/definitions rather than demanding per-date crawls. Liturgical correctness
+means the page has supported evidence and complete text. Rendering and operator
+diagnostics share one resolver; the checker uses one consistent in-memory snapshot
+for its whole window. It distinguishes same-source conflicts, unsupported calendar
+rules/options, stale date choices, invalid references and missing text rather than
+prescribing another crawl for every failure. Liturgical correctness
 still depends on the explicitly approved upstream calendar, scope and mappings.
 Scheduled source audits are separate from these availability checks.
 
