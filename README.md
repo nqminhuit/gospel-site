@@ -55,9 +55,16 @@ and rejects missing/partial verse text.
 - Default `READING_CALENDAR=vatican-vi`: matching accepted exact-date provenance,
   canonical dated source URL, reference and timestamp. A later conflicting
   observation of that same source is unavailable pending review.
-- Explicit `roman-general` or `vietnam`: current versioned calendar definition plus
-  a reviewed reusable entry; a scoped date-specific acceptance takes precedence.
+- Explicit supported calendar: current versioned definition plus a reviewed
+  reusable entry; a scoped date-specific acceptance takes precedence. Weekday
+  Gospel keys can repeat across I/II first-reading cycles; Sunday A/B/C and
+  proper/memorial identities remain separate. Keys are opaque to the frontend.
   An existing stale date decision blocks silent fallback to an ordinary entry.
+- The unreviewed Vietnam Romcal provider misplaces the Vietnamese Martyrs.
+  Derived `vietnam` entries with automatic `romcal-` rules versions are blocked,
+  including warm caches. Reviewed national definitions need their own rules
+  version; named diocesan/parish adapters are not implemented yet and must not be
+  relabeled national. Independent valid exact-date choices remain separate evidence.
 - Only `READING_MASS_OPTION=day` is currently supported. Other options, missing
   definitions/reviews, unsupported dates and incomplete text are unavailable.
 - No fallback across calendar scopes, stale rules, or estimated `lectionary_key`
@@ -66,8 +73,9 @@ and rejects missing/partial verse text.
   The UI distinguishes `source_checked` from `calendar_resolved` and links the
   **actual evidence**, potentially from another year, not an invented future page.
 
-Profiles are candidate policies, not confirmation of this site's national,
-diocesan or parish calendar. Vietnamese source language proves no jurisdiction.
+Roman General remains an evaluation profile; automatic Vietnam-provider export
+and reuse are disabled upstream pending reviewed national/local rules. Neither
+namespace confirms this site's national, diocesan or parish calendar. Vietnamese source language proves no jurisdiction.
 Confirm calendar scope, default options and local exceptions before activating a
 profile or repairing the full archive. See the upstream
 [policy and operator contract](https://github.com/nqminhuit/daily-bible/blob/master/data/calendar-policy.md).
