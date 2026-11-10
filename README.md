@@ -87,9 +87,14 @@ and partial `data/vietnam-national-sources.json` dossier. Its 2026 Ash Mass
 transfer does not move Lent/the Hours, and its conditional Ascension template
 does not establish one default schedule. The explicit upstream **2026 national
 pilot** implements nine sourced definitions and marks the remaining 356 dates
-unsupported; only two Gospel mappings were reviewed on a temporary demonstration
-copy. It is not production coverage and must not be activated by sync/deploy jobs.
-November 15's national celebration/default formulary remains unresolved.
+unsupported. The temporary-copy content continuation now has eight renderable
+dates after six more Gospel reviews and a five-verse text repair; Mồng Ba Tết's
+authorized default option remains pending. See upstream
+`data/vietnam-content-audit.md` and `data/vietnam-content-review.json`. The found
+Vĩnh Long Ordo is diocesan, not the national baseline; the approved lectionary
+edition/option-order contract is incomplete. This is not production coverage and
+must not be activated by sync/deploy jobs. November 15's national
+celebration/default formulary remains unresolved.
 
 Schema-3 definitions and migration 005 separate the assigned Mass from its
 underlying observance/seasons and preserve each day's precise directive URL and
