@@ -73,13 +73,20 @@ and rejects missing/partial verse text.
   The UI distinguishes `source_checked` from `calendar_resolved` and links the
   **actual evidence**, potentially from another year, not an invented future page.
 
-Roman General remains an evaluation profile; automatic Vietnam-provider export
-and reuse are disabled upstream pending reviewed national/local rules. Neither
-namespace confirms this site's national, diocesan or parish calendar. Vietnamese source language proves no jurisdiction.
-Confirm calendar scope, default options and local exceptions before activating a
-profile or repairing the full archive. See the upstream
-[policy and operator contract](https://github.com/nqminhuit/daily-bible/blob/master/data/calendar-policy.md).
-The November 15, 2026 calendar discrepancy is not automatically resolved.
+The owner confirmed **Vietnam's approved national calendar, daytime Mass, no
+assumed local overlay** as the target on 2026-11-10. Follow an authoritative
+Gospel assignment; otherwise use the approved lectionary's first-listed full
+authorized option. This is not approval of a provider, calendar dataset, reading,
+snapshot or deployment. The runtime default remains source-only `vatican-vi`;
+Roman General remains an evaluation profile, and automatic Vietnam-provider
+export/reuse remain blocked upstream. Vietnamese source language proves no
+jurisdiction. Review national rules, historical applicability, allowed sets and
+coverage before activating a profile or repairing the archive. See the upstream
+[policy and operator contract](https://github.com/nqminhuit/daily-bible/blob/master/data/calendar-policy.md)
+and partial `data/vietnam-national-sources.json` dossier. Its 2026 Ash Mass
+transfer does not move Lent/the Hours, and its conditional Ascension template
+does not establish one default schedule. November 15's national
+celebration/default formulary is not automatically resolved.
 
 A supported warm cache renders historical/future dates without dated-page records
 or HTTP. Legacy references remain audit data, not automatically approved readings.
