@@ -69,7 +69,7 @@ async function main() {
   // operation; generating legacy importYear estimates does not approve readings.
   const LOOKAHEAD_DAYS = intEnv('LOOKAHEAD_DAYS', 2);
   const CLIFF_WARN_DAYS = intEnv('CLIFF_WARN_DAYS', 45);
-  const calendar = process.env.READING_CALENDAR || 'vatican-vi';
+  const calendar = process.env.READING_CALENDAR || 'vietnam';
 
   const today = todayInVietnam();
   const dates = Array.from({ length: LOOKAHEAD_DAYS + 1 }, (_, i) => addDays(today, i));

@@ -52,7 +52,8 @@ and rejects missing/partial verse text.
 
 `lib/reading.js` implements the shared evidence contract:
 
-- Default `READING_CALENDAR=vatican-vi`: matching accepted exact-date provenance,
+- **Active default since 2026-11-11: `READING_CALENDAR=vietnam`.** The snapshot holds the 2021-2050 Vietnam calendar (General Roman baseline; Epiphany, Ascension and Corpus Christi on Sunday; Vietnamese Martyrs on November 24) and reviewed year-independent Gospel entries. Tết Masses are out of scope; Palm Sunday, Holy Thursday, Good Friday, Holy Saturday and a few Sundays the source never published show no reading. Most days carry no celebration label. Older paragraphs that call `vatican-vi` the default or Vietnam a pilot are history.
+- `READING_CALENDAR=vatican-vi` (the previous default): matching accepted exact-date provenance,
   canonical dated source URL, reference and timestamp. A later conflicting
   observation of that same source is unavailable pending review.
 - Explicit supported calendar: current versioned definition plus a reviewed
@@ -77,7 +78,7 @@ The owner confirmed **Vietnam's approved national calendar, daytime Mass, no
 assumed local overlay** as the target on 2026-11-10. Follow an authoritative
 Gospel assignment; otherwise use the approved lectionary's first-listed full
 authorized option. This is not approval of a provider, calendar dataset, reading,
-snapshot or deployment. The runtime default remains source-only `vatican-vi`;
+snapshot or deployment. (History: at that time the runtime default was source-only `vatican-vi`; the owner approved activation on 2026-11-11.)
 Roman General remains an evaluation profile, and automatic Vietnam-provider
 export/reuse remain blocked upstream. Vietnamese source language proves no
 jurisdiction. Review national rules, historical applicability, allowed sets and
@@ -140,7 +141,7 @@ only notified when a person is actually needed. The site never fetches anything
 at runtime — the sync runs in CI, and only after a check has already failed.
 
 Run `npm run check-readings`. Set repository variable `READING_CALENDAR` to match
-production (default `vatican-vi`). For a temporary reviewed-cache snapshot:
+production (default `vietnam`). For a temporary reviewed-cache snapshot:
 
 ```sh
 DB_PATH=/tmp/reading-audit.db READING_CALENDAR=roman-general npm run check-readings
